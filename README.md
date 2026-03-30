@@ -14,7 +14,7 @@
 
 ## 📸 Demo
 
-![PawPal+ App Screenshot](Screenshot%202026-03-30%20at%2012.18.11%20AM.png)
+![PawPal+ App Screenshot](Screenshot%202026-03-30%20at%2012.18.11%E2%80%AFAM.png)
 
 You are building **PawPal+**, a Streamlit app that helps a pet owner plan care tasks for their pet.
 
