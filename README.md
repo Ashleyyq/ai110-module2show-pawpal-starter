@@ -44,6 +44,33 @@ Beyond the basic plan generator, PawPal+ includes several features that make sch
 
 ---
 
+## Testing PawPal+
+
+### How to run
+
+```bash
+python -m pytest tests/test_pawpal.py -v
+```
+
+### What the tests cover
+
+| Area | What is tested |
+|---|---|
+| **Task completion** | `mark_complete()` flips `completed` from `False` to `True` |
+| **Task addition** | Adding a task to a pet increases its task count |
+| **Sorting** | Tasks added out of order come out in chronological order after `sort_tasks_by_time()`; untimed tasks are pushed to the end |
+| **Recurrence** | Daily tasks produce a next occurrence due tomorrow; weekly tasks due in 7 days; unrecognized frequency returns `None`; next occurrence is auto-added to the pet |
+| **Conflict detection** | Two tasks at the same time produce a warning; different times produce none; tasks with no `scheduled_time` are never flagged |
+| **Edge cases** | A pet with no tasks and an owner with zero available time both produce an empty schedule without crashing |
+
+### Confidence level
+
+**4 / 5 stars**
+
+The core scheduling behaviors priority sorting, recurrence, and conflict detection which are well tested and cover both happy paths and important edge cases. I gave it 4 instead of 5 because there are still some scenarios I did not test yet, like what happens when the owner has no pets at all, or when a recurring task is accidentally marked complete twice. These are the next edge cases I would add if I had more time.
+
+---
+
 ### Suggested workflow
 
 1. Read the scenario carefully and identify requirements and edge cases.
