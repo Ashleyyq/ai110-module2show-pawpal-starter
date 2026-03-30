@@ -1,5 +1,21 @@
 # PawPal+ (Module 2 Project)
 
+## Features
+
+- **Priority-based scheduling** — tasks are sorted by priority (high → medium → low) using a greedy algorithm. High-priority tasks like feeding and medication always get scheduled first within the owner's daily time budget.
+- **Sorting by time** — after generating a plan, tasks are re-ordered chronologically by `scheduled_time` (HH:MM format) so the owner sees a real timeline for their day.
+- **Skipped task detection** — any task that does not fit within the available time is clearly listed in a separate "Skipped Tasks" table with the reason, so the owner never loses track of what was left out.
+- **Conflict warnings** — if two tasks share the same scheduled time, the app displays a red error banner and individual warnings identifying exactly which tasks overlap.
+- **Daily recurrence** — marking a `daily` or `weekly` task complete automatically creates the next occurrence with the correct due date using Python's `timedelta`, so recurring care tasks never need to be re-entered manually.
+- **Filter by pet or status** — the schedule can be filtered by pet name or status (Scheduled / Skipped / Completed) so the owner can focus on one pet at a time or check what still needs to be done.
+- **Input validation** — scheduled time is validated against HH:MM format before saving, preventing bad data from breaking the sort order.
+
+---
+
+## 📸 Demo
+
+![PawPal+ App Screenshot](Screenshot%202026-03-30%20at%2012.18.11%20AM.png)
+
 You are building **PawPal+**, a Streamlit app that helps a pet owner plan care tasks for their pet.
 
 ## Scenario
