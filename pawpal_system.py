@@ -1,5 +1,8 @@
 from dataclasses import dataclass, field
+from datetime import date, timedelta
 from typing import Optional
+
+FREQUENCY_DAYS = {"daily": 1, "weekly": 7}
 
 
 # ---------------------------------------------------------------------------
@@ -11,10 +14,12 @@ PRIORITY_MAP = {"low": 1, "medium": 2, "high": 3}
 @dataclass
 class Task:
     description: str
-    duration: int               # in minutes
-    frequency: str              # e.g. "daily", "twice a day"
-    priority: str               # "low", "medium", or "high"
-    completed: bool = False     # tracks whether this task is done
+    duration: int                           # in minutes
+    frequency: str                          # "daily", "weekly", etc.
+    priority: str                           # "low", "medium", or "high"
+    scheduled_time: Optional[str] = None   # when the task should happen, e.g. "08:00"
+    due_date: Optional[date] = None        # the date this task is due
+    completed: bool = False                # tracks whether this task is done
 
     def get_priority_score(self) -> int:
         """Convert priority string to a number for sorting (higher = more urgent)."""
@@ -27,6 +32,21 @@ class Task:
     def mark_complete(self) -> None:
         """Mark this task as completed."""
         self.completed = True
+
+    def next_occurrence(self) -> Optional["Task"]:
+        """Return a new Task due on the next occurrence date based on frequency, or None if not recurring."""
+        days = FREQUENCY_DAYS.get(self.frequency)
+        if days is None:
+            return None
+        base = self.due_date if self.due_date else date.today()
+        return Task(
+            description=self.description,
+            duration=self.duration,
+            frequency=self.frequency,
+            priority=self.priority,
+            scheduled_time=self.scheduled_time,
+            due_date=base + timedelta(days=days),
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -111,6 +131,49 @@ class Scheduler:
 
         return self.schedule
 
+    def sort_tasks_by_time(self) -> list[tuple]:
+        """Sort the scheduled tasks by scheduled_time; tasks with no time set go to the end."""
+        timed = [(t, p) for t, p in self.schedule if t.scheduled_time is not None]
+        untimed = [(t, p) for t, p in self.schedule if t.scheduled_time is None]
+        self.schedule = sorted(timed, key=lambda pair: pair[0].scheduled_time) + untimed
+        return self.schedule
+
+    def mark_task_complete(self, task: Task, pet: Pet) -> Optional[Task]:
+        """Mark a task done and auto-add the next occurrence to the pet if the task recurs."""
+        task.mark_complete()
+        next_task = task.next_occurrence()
+        if next_task:
+            pet.add_task(next_task)
+        return next_task
+
+    def detect_conflicts(self) -> list[str]:
+        """Return a list of warning messages for any two tasks scheduled at the same time."""
+        warnings = []
+        seen = {}   # scheduled_time -> (task, pet) of first task seen at that time
+
+        for task, pet in self.schedule:
+            if task.scheduled_time is None:
+                continue
+            if task.scheduled_time in seen:
+                other_task, other_pet = seen[task.scheduled_time]
+                warnings.append(
+                    f"CONFLICT @ {task.scheduled_time}: "
+                    f"'{other_pet.name}: {other_task.description}' "
+                    f"and '{pet.name}: {task.description}' overlap."
+                )
+            else:
+                seen[task.scheduled_time] = (task, pet)
+
+        return warnings
+
+    def filter_by_pet(self, pet_name: str) -> list[tuple]:
+        """Return only scheduled tasks that belong to the given pet name."""
+        return [(t, p) for t, p in self.schedule if p.name == pet_name]
+
+    def filter_by_status(self, completed: bool) -> list[tuple]:
+        """Return only scheduled tasks that match the given completion status."""
+        return [(t, p) for t, p in self.schedule if t.completed == completed]
+
     def explain_plan(self) -> str:
         """Return a human-readable schedule ranked by priority, showing pet name per task."""
         if not self.schedule:
@@ -120,8 +183,9 @@ class Scheduler:
         time_used = 0
 
         for i, (task, pet) in enumerate(self.schedule, start=1):
+            time_label = f" @ {task.scheduled_time}" if task.scheduled_time else ""
             lines.append(
-                f"{i}. [{task.priority.upper()}] {pet.name}: {task.description} ({task.duration} min)"
+                f"{i}. [{task.priority.upper()}] {pet.name}: {task.description} ({task.duration} min{time_label})"
             )
             time_used += task.duration
 

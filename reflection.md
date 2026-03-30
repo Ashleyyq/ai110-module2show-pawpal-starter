@@ -4,8 +4,19 @@
 
 **a. Initial design**
 
+At first, I am thinking about three core user actions:
+1. Add a pet: The user can enter their pet's basic information (name and species) so the system knows what kind of care tasks are relevant.
+2. Add a care task: The user can create a task by providing a description, how long it will take, and how important it is (priority). This lets the planner know what needs to get done.
+3. Generate today's plan: The user can click a button to see an ordered schedule for the day. The planner will pick and sort tasks based on priority and the owner's available time.
+
 - Briefly describe your initial UML design.
+For my initial UML design, I decided to use four main classes: Owner, Pet, Task, and Planner. The relationships between classes are: Owner has one or more Pets, and Planner uses the Owner, a list of Pet objects, and a list of Task objects to build the schedule.
+
 - What classes did you include, and what responsibilities did you assign to each?
+1. Owner: stores the owner's name, their daily time limit, and their personal preferences (like preferred walk time or what kind of tasks they care most about).
+2. Pet: stores the pet's name, species, and any special needs (for example, a dog needs more frequent walks than a cat).
+3. Task: represents one care activity. It has a title, a description, how long it takes (duration), how often it should happen (frequency), and a priority level (high, medium, or low).
+4. Planner: is the main scheduling class. It takes a list of tasks and the constraints from the owner and pet, then produces an ordered daily plan.
 
 **b. Design changes**
 
@@ -24,7 +35,10 @@
 **b. Tradeoffs**
 
 - Describe one tradeoff your scheduler makes.
+My scheduler uses a greedy approach which always picks the highest priority task first, then keeps adding tasks until the time runs out. This means it does not try every possible combination of tasks to find the most efficient schedule. For example, if two high-priority tasks together take 80 minutes but the owner only has 60 minutes, the scheduler will try to fit them both and then have no time left for anything else, even if a medium-priority task only takes 5 minutes and could easily fit.
+
 - Why is that tradeoff reasonable for this scenario?
+For a pet care app, I think this tradeoff is reasonable because the most important thing is to make sure critical tasks like feeding and medication always happen first. A more "optimal" algorithm that tries every combination would be more complex to write and harder to understand, and for daily pet care the difference is usually small. The owner also knows their pet's needs best, if they mark something as high priority, the scheduler should respect that without question. So being simple and predictable is more useful here than being mathematically perfect.
 
 ---
 

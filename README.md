@@ -32,6 +32,18 @@ source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+## Smarter Scheduling
+
+Beyond the basic plan generator, PawPal+ includes several features that make scheduling more practical for a real pet owner:
+
+- **Priority-based scheduling** — tasks are sorted by priority (high → medium → low) and fit into the owner's daily time budget using a greedy approach. High-priority tasks like feeding and medication are always scheduled first.
+- **Scheduled time + chronological sorting** — each task can have a `scheduled_time` (e.g. `"08:00"`). After generating a plan, `sort_tasks_by_time()` re-orders tasks into the actual time order the owner should do them.
+- **Filtering** — the schedule can be filtered by pet name (`filter_by_pet()`) or completion status (`filter_by_status()`), so the owner can focus on what's left to do or check one pet at a time.
+- **Recurring task automation** — when a `daily` or `weekly` task is marked complete, `mark_task_complete()` automatically creates the next occurrence using Python's `timedelta` and adds it back to the pet's task list.
+- **Conflict detection** — `detect_conflicts()` scans the schedule and returns a warning message if two tasks are assigned the same `scheduled_time`, without crashing the program.
+
+---
+
 ### Suggested workflow
 
 1. Read the scenario carefully and identify requirements and edge cases.
